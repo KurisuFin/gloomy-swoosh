@@ -51,13 +51,30 @@ class ImageCamera(Camera):
         pass
 
 
-if __name__ == "__main__":
-    def refresher():
-        img = camera.take()
-        label.configure(image=img)
-        label.image = img
-        root.after(100, refresher)
+class Looper(object):
+    def __init__(self, cam):
+        self.cam = cam
+        self.last = 0
 
+    def run(self):
+        self.refresher()
+
+    def refresher(self):
+        t = time()
+        unix_time = floor(t)
+        print(unix_time)
+
+        img = camera.take()
+        if self.last < unix_time:
+            print('NYT')
+            label.configure(image=img)
+            label.image = img
+            self.last = unix_time
+
+        root.after(100, self.refresher)
+
+
+if __name__ == "__main__":
     root = Tk()
 
     camera = WebCamera(0)
@@ -65,7 +82,9 @@ if __name__ == "__main__":
     label = Label(root, relief=RAISED)
     label.pack(side='top')
 
-    refresher()
+    looper = Looper(camera)
+    looper.run()
+
     root.mainloop()
     camera.release()
 
